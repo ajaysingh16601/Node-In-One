@@ -1,6 +1,7 @@
+// token.js
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
-import Token from '../models/Token.js';
+import TokenStore from '../models/TokenStore.js';
 
 export const generateToken = async (userId) => {
   const accessToken = jwt.sign({ userId }, config.jwt.secret, {
@@ -12,11 +13,20 @@ export const generateToken = async (userId) => {
   });
 
   const decodedRefresh = jwt.decode(refreshToken);
-  const expiresAt = new Date(decodedRefresh.exp * 1000); // Convert to ms
 
-  await Token.create({ user: userId, refreshToken, expiresAt });
-  console.log('accessToken: ', accessToken);
-  console.log('refreshToken: ', refreshToken);
+  await TokenStore.create({
+    user: userId,
+    token: refreshToken,
+    type: 'refresh',
+    expiresAt: new Date(decodedRefresh.exp * 1000),
+  });
+
+  console.log('TokenStore: ', {
+    user: userId,
+    token: refreshToken,
+    type: 'refresh',
+    expiresAt: new Date(decodedRefresh.exp * 1000),
+  });
   return { accessToken, refreshToken };
 };
 
@@ -24,4 +34,3 @@ export const verifyToken = (token, isRefresh = false) => {
   const secret = isRefresh ? config.jwt.refreshSecret : config.jwt.secret;
   return jwt.verify(token, secret);
 };
-

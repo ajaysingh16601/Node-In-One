@@ -1,8 +1,9 @@
+// auth.controller.js
 import * as OtpService from './otp.service.js';
 import * as AuthService from './auth.service.js';
 import { generateToken, verifyToken } from '../../utils/token.js';
-import Token from '../../models/Token.js';
-
+import jwt from 'jsonwebtoken';
+import TokenStore from '../../models/TokenStore.js';
 // Register
 // Step 1: Request OTP for Registration
 export const requestOtp = async (req, res) => {
@@ -108,8 +109,6 @@ export const verifyForgotOtp = async (req, res) => {
 
 // Step 3: Reset password
 export const resetPassword = async (req, res) => {
-  // const { error } = resetPasswordSchema.validate(req.body);
-  // if (error) return res.status(400).json({ message: error.details[0].message });
 
   const { newPassword, resetToken } = req.body;
 
@@ -145,19 +144,33 @@ export const changePassword = async (req, res) => {
 // Logout
 export const logoutController = async (req, res) => {
   const { refreshToken } = req.body;
-
+  const authHeader = req.headers.authorization;
   if (!refreshToken || typeof refreshToken !== 'string') {
     return res.status(400).json({ message: 'Refresh token is required' });
   }
 
   try {
-    const deletedToken = await Token.findOneAndDelete({ refreshToken });
+    const deletedRefresh = await TokenStore.findOneAndDelete({ token: refreshToken, type: 'refresh' });
+if (!deletedRefresh) {
+  return res.status(200).json({ message: 'Already logged out or refresh token not found.' }); 
+  // message = 'Already logged out or refresh token not found.';
+}
 
-    if (!deletedToken) {
-      return res.status(200).json({ message: 'Already logged out or token not found' });
+    if (authHeader?.startsWith('Bearer ')) {
+      const accessToken = authHeader.split(' ')[1];
+      const decoded = jwt.decode(accessToken);
+
+      if (decoded?.exp) {
+        const expiresAt = new Date(decoded.exp * 1000);
+        await TokenStore.create({
+          token: accessToken,
+          type: 'access',
+          expiresAt,
+        });
+      }
     }
 
-    return res.status(200).json({ message: 'Logout successful. Token invalidated.' });
+    return res.status(200).json({ message: 'Logout successful. Tokens invalidated.' });
   } catch (error) {
     console.error('Logout error:', error);
     return res.status(500).json({ message: 'Internal server error' });
