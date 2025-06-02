@@ -1,10 +1,11 @@
 import express from 'express';
-import { changePassword, login, logoutController, refreshToken, register, requestForgotOtp, requestOtp, resetPassword, verifyForgotOtp, verifyLoginOtp, verifyOtp} from './auth.controller.js';
+import { changePassword, issueJWTForGoogleUser, login, logoutController, refreshToken, register, requestForgotOtp, requestOtp, resetPassword, verifyForgotOtp, verifyLoginOtp, verifyOtp} from './auth.controller.js';
 import { validate } from '../../middlewares/validate.js';
 import { changePasswordSchema, loginValidation, otpVerifyValidation, registerSchema, resetPasswordSchema } from './auth.validator.js';
 import { authenticate } from '../../middlewares/authenticate.js';
 import { sendTestSMS } from '../../controllers/sms.controller.js';
 import { validateLogout } from '../../middlewares/validateLogout.js';
+import passport from 'passport';
 
 const router = express.Router();
 //regiter
@@ -28,6 +29,9 @@ router.post('/send-test-sms', sendTestSMS);
 // logout
 router.post('/logout', validateLogout, logoutController);
 
-// router.get('/google/callback', googleOAuth);
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+router.get('/google/callback', passport.authenticate('google', { session: false, failureRedirect: '/' }), issueJWTForGoogleUser
+);
 
 export default router;

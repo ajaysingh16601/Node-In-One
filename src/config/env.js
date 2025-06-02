@@ -12,7 +12,7 @@ export const config = {
   dbUri: process.env.MONGO_URI,
   oauth: {
     googleClientId: process.env.GOOGLE_CLIENT_ID,
-    googleSecret: process.env.GOOGLE_SECRET,
+    googleSecret: process.env.GOOGLE_CLIENT_SECRET,
   },
   email: {
     user: process.env.SENDGRID_API_KEY,

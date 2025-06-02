@@ -176,3 +176,15 @@ if (!deletedRefresh) {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+// OAuth
+export const issueJWTForGoogleUser = async (req, res, next) => {
+  try {
+    const user = req.user;
+    const tokens = await generateToken(user._id);
+
+    res.status(200).json({ user, tokens });
+  } catch (err) {
+    next(err);
+  }
+};
