@@ -5,10 +5,12 @@ import { generateToken, verifyToken } from '../../utils/token.js';
 import jwt from 'jsonwebtoken';
 import TokenStore from '../../models/TokenStore.js';
 // Register
+
 // Step 1: Request OTP for Registration
 export const requestOtp = async (req, res) => {
   const { email } = req.body;
   const userExists = await AuthService.checkUserExists(email);
+
   if (userExists) return res.status(400).json({ message: 'User already registered' });
 
   const result = await OtpService.requestOtp(email);
