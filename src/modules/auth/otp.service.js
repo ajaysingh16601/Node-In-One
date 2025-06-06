@@ -6,6 +6,7 @@ import { checkRateLimit } from '../../utils/rateLimiter.js';
 export const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 export const requestOtp = async (email, type) => {
+
   const allowed = checkRateLimit(email, type);
   if (!allowed) throw new Error('Too many OTP requests. Please try again later.');
 
@@ -23,6 +24,7 @@ export const requestOtp = async (email, type) => {
 
 
 export const verifyOtp = async ({ email, otp, secret, type }) => {
+
   const record = await Otp.findOne({ email, secret, type });
   if (!record) throw new Error('Invalid OTP details');
   if (record.otp !== otp) throw new Error('Invalid OTP');
