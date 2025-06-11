@@ -31,5 +31,6 @@ export const verifyOtp = async ({ email, otp, secret, type }) => {
   if (record.expiresAt < new Date()) throw new Error('OTP expired');
 
   await record.deleteOne();
+
   return true;
 };
