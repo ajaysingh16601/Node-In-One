@@ -22,7 +22,6 @@ export const requestOtp = async (email, type) => {
   return { secret, otp };
 };
 
-
 export const verifyOtp = async ({ email, otp, secret, type }) => {
 
   const record = await Otp.findOne({ email, secret, type });
