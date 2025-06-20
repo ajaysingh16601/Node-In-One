@@ -8,6 +8,7 @@ import { validateLogout } from '../../middlewares/validateLogout.js';
 import passport from 'passport';
 
 const router = express.Router();
+
 //regiter
 router.post('/otp/request', requestOtp);
 router.post('/otp/verify', verifyOtp);
