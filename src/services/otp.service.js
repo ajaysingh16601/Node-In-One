@@ -1,7 +1,7 @@
-import Otp from '../../models/Otp.js';
+import Otp from '../models/Otp.js';
 import crypto from 'crypto';
-import { sendEmail } from '../../utils/email.js';
-import { checkRateLimit } from '../../utils/rateLimiter.js';
+import { sendEmail } from '../utils/email.js';
+import { checkRateLimit } from '../utils/rateLimiter.js';
 
 export const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
 

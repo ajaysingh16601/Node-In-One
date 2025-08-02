@@ -1,9 +1,8 @@
 // auth.service.js
-import User from '../../models/User.js';
-import { hashPassword, comparePassword } from '../../utils/hash.js';
-import { generateToken } from '../../utils/token.js';
-import { sendEmail } from '../../utils/email.js';
-import Otp from '../../models/Otp.js';
+import User from '../user/user.model.js';
+import { hashPassword, comparePassword } from '../../../utils/hash.js';
+import { generateToken } from '../../../utils/token.js';
+import Otp from '../../../models/Otp.js';
 import crypto from 'crypto';
 
 // register

@@ -1,9 +1,9 @@
 // auth.controller.js
 import * as OtpService from './otp.service.js';
 import * as AuthService from './auth.service.js';
-import { generateToken, verifyToken } from '../../utils/token.js';
+import { generateToken, verifyToken } from '../../../utils/token.js';
 import jwt from 'jsonwebtoken';
-import TokenStore from '../../models/TokenStore.js';
+import TokenStore from '../../../models/TokenStore.js';
 // Register
 
 // Step 1: Request OTP for Registration
