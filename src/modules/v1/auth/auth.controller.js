@@ -1,5 +1,5 @@
 // auth.controller.js
-import * as OtpService from './otp.service.js';
+import * as OtpService from '../../../services/otp.service.js';
 import * as AuthService from './auth.service.js';
 import { generateToken, verifyToken } from '../../../utils/token.js';
 import jwt from 'jsonwebtoken';

@@ -20,7 +20,7 @@ class UserController {
         }
     }
 
-    async deleteAccount(req, res, next) {
+    async deleteUserAccount(req, res, next) {
         try {
         await UserService.deleteUser(req.user._id);
         res.status(204).send();

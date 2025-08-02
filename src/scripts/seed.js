@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import User from '../models/User.js';
+import User from '../modules/v1/user/user.model.js';
 import { config } from '../config/env.js';
 
 // Optional: If using bcrypt for hashing passwords

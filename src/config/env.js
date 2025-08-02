@@ -10,7 +10,7 @@ export const config = {
     refreshExpiresIn: '2h',
   },
   devSecret: process.env.DEV_SECRET,
-  dbUri: process.env.MONGO_URI,
+  dbUri: process.env.MONGODB_URI,
   oauth: {
     googleClientId: process.env.GOOGLE_CLIENT_ID,
     googleSecret: process.env.GOOGLE_CLIENT_SECRET,
