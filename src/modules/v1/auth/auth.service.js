@@ -1,19 +1,19 @@
 // auth.service.js
 import User from '../user/user.model.js';
 import { hashPassword, comparePassword } from '../../../utils/hash.js';
-import { generateToken } from '../../../utils/token.js';
+import { generateToken } from '../../..//utils/token.js';
 import Otp from '../../../models/Otp.js';
 import crypto from 'crypto';
 
 // register
-export const registerUser = async ({ email, password, name }) => {
+export const registerUser = async ({ email, password, username, firstname, lastname}) => {
     const exists = await User.findOne({ email });
     if (exists) throw new Error('Email already in use');
 
     const hashed = await hashPassword(password);
-    const user = await User.create({ email, password: hashed, name });
+    const user = await User.create({ email, password: hashed, username, firstname, lastname });
 
-    const tokens = generateToken(user._id);
+    const tokens = await generateToken(user._id);
     return { user, tokens };
 };
 

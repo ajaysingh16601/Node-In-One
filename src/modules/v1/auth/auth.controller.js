@@ -1,7 +1,7 @@
 // auth.controller.js
 import * as OtpService from '../../../services/otp.service.js';
 import * as AuthService from './auth.service.js';
-import { generateToken, verifyToken } from '../../../utils/token.js';
+import { generateJwtToken, generateToken, verifyToken } from '../../../utils/token.js';
 import jwt from 'jsonwebtoken';
 import TokenStore from '../../../models/TokenStore.js';
 // Register
@@ -13,22 +13,22 @@ export const requestOtp = async (req, res) => {
 
   if (userExists) return res.status(400).json({ message: 'User already registered' });
 
-  const result = await OtpService.requestOtp(email);
+  const result = await OtpService.requestOtp(email,'register');
   res.json(result);
 };
 
 // Step 2: Verify OTP and return registration token
 export const verifyOtp = async (req, res) => {
   const { email, otp, secret } = req.body;
-  await OtpService.verifyOtp({ email, otp, secret });
+  await OtpService.verifyOtp({ email, otp, secret, type: 'register' });
 
-  const registrationToken = generateToken(email, '10m');
+  const registrationToken = generateJwtToken({ userId: email }, '10m');
   res.json({ registrationToken });
 };
 
 // Step 3: Register user
 export const register = async (req, res) => {
-  const { name, password, registrationToken } = req.body;
+  const { username, password, registrationToken, firstname, lastname } = req.body;
 
   let email;
   try {
@@ -38,7 +38,7 @@ export const register = async (req, res) => {
     return res.status(401).json({ message: 'Invalid or expired registration token' });
   }
 
-  const result = await AuthService.registerUser({ name, email, password });
+  const result = await AuthService.registerUser({ username, email, password, firstname, lastname  });
   res.status(201).json(result);
 };
 

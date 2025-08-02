@@ -17,7 +17,7 @@ export const requestOtp = async (email, type) => {
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
   await Otp.create({ email, otp, secret, expiresAt, type });
-  await sendEmail(email, `Your ${type} OTP: ${otp}`);
+  // await sendEmail(email, `Your ${type} OTP: ${otp}`);
 
   return { secret, otp };
 };

@@ -3,14 +3,14 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
 import TokenStore from '../models/TokenStore.js';
 
-export const generateToken = async (userId) => {
-  const accessToken = jwt.sign({ userId }, config.jwt.secret, {
-    expiresIn: config.jwt.expiresIn,
-  });
+export const generateJwtToken = (payload, expiresIn = '1h', isRefresh = false) => {
+  const secret = isRefresh ? config.jwt.refreshSecret : config.jwt.secret;
+  return jwt.sign(payload, secret, { expiresIn });
+};
 
-  const refreshToken = jwt.sign({ userId }, config.jwt.refreshSecret, {
-    expiresIn: config.jwt.refreshExpiresIn,
-  });
+export const generateToken = async (userId) => {
+  const accessToken = generateJwtToken({ userId }, config.jwt.expiresIn);
+  const refreshToken = generateJwtToken({ userId }, config.jwt.refreshExpiresIn, true);
 
   const decodedRefresh = jwt.decode(refreshToken);
 
@@ -21,12 +21,6 @@ export const generateToken = async (userId) => {
     expiresAt: new Date(decodedRefresh.exp * 1000),
   });
 
-  console.log('TokenStore: ', {
-    user: userId,
-    token: refreshToken,
-    type: 'refresh',
-    expiresAt: new Date(decodedRefresh.exp * 1000),
-  });
   return { accessToken, refreshToken };
 };
 
