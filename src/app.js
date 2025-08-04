@@ -8,7 +8,7 @@ import passport from 'passport';
 import { errorHandler } from './middlewares/errorHandler.js';
 import v1Routes from './routes/v1/index.js';
 import './middlewares/googleStrategy.js';
-// import { humanizeString } from 'ajeymanize-text-utils';
+import { humanizeString } from 'ajeymanize-text-utils';
 import { config } from './config/env.js';
 
 const app = express();
