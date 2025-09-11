@@ -1,16 +1,19 @@
 // token.js
 import jwt from 'jsonwebtoken';
-import { config } from '../config/env.js';
 import TokenStore from '../models/TokenStore.js';
+import { getJWTConfig } from '../config/env.js';
 
-export const generateJwtToken = (payload, expiresIn = '1h', isRefresh = false) => {
-  const secret = isRefresh ? config.jwt.refreshSecret : config.jwt.secret;
+export const generateJwtToken = async (payload, expiresIn = '1h', isRefresh = false) => {
+      const jwtConfig = await getJWTConfig();
+
+  const secret = isRefresh ? jwtConfig.refreshSecret : jwtConfig.secret;
   return jwt.sign(payload, secret, { expiresIn });
 };
 
 export const generateToken = async (userId) => {
-  const accessToken = generateJwtToken({ userId }, config.jwt.expiresIn);
-  const refreshToken = generateJwtToken({ userId }, config.jwt.refreshExpiresIn, true);
+  const jwtConfig = await getJWTConfig();
+  const accessToken = await generateJwtToken({ userId }, jwtConfig.expiresIn);
+  const refreshToken = await generateJwtToken({ userId }, jwtConfig.refreshExpiresIn, true);
 
   const decodedRefresh = jwt.decode(refreshToken);
 
@@ -24,7 +27,8 @@ export const generateToken = async (userId) => {
   return { accessToken, refreshToken };
 };
 
-export const verifyToken = (token, isRefresh = false) => {
-  const secret = isRefresh ? config.jwt.refreshSecret : config.jwt.secret;
+export const verifyToken = async (token, isRefresh = false) => {
+  const jwtConfig = await getJWTConfig();
+  const secret = isRefresh ? jwtConfig.refreshSecret : jwtConfig.secret;
   return jwt.verify(token, secret);
 };
