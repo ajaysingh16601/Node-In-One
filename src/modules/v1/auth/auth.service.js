@@ -1,9 +1,10 @@
 // auth.service.js
 import User from '../user/user.model.js';
 import { hashPassword, comparePassword } from '../../../utils/hash.js';
-import { generateToken } from '../../..//utils/token.js';
+import { generateToken } from '../../../utils/token.js';
 import Otp from '../../../models/Otp.js';
 import crypto from 'crypto';
+// import { sendEmail } from '../../../utils/email.js';
 
 // register
 export const registerUser = async ({ email, password, username, firstname, lastname}) => {
@@ -49,9 +50,8 @@ export const verifyOtpAndLogin = async (email, otp, secret) => {
     if (record.expiresAt < new Date()) throw new Error('OTP expired');
 
     await record.deleteOne();
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("-password");
     const tokens = await generateToken(user._id);
-    console.log('tokens: ', tokens);
 
     return { user, tokens };
 };

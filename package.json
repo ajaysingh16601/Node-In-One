@@ -11,6 +11,7 @@
   "author": "Ajey Singh",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.884.0",
     "@sendgrid/mail": "^8.1.5",
     "ajeymanize-text-utils": "^1.0.1",
     "bcrypt": "^5.1.1",
