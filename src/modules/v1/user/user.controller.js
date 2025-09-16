@@ -22,10 +22,21 @@ class UserController {
 
     async deleteUserAccount(req, res, next) {
         try {
-        await UserService.deleteUser(req.user._id);
-        res.status(204).send();
+            await UserService.deleteUser(req.user._id);
+            res.status(200).json({ message: 'User account deleted successfully.' });
         } catch (err) {
-        next(err);
+            next(err);
+        }
+    }
+
+    async listUsers(req, res, next) {
+        try {
+            const page = parseInt(req.query.page, 10) || 1;
+            const limit = parseInt(req.query.limit, 10) || 10;
+            const result = await UserService.listUsers({ page, limit });
+            res.json(result);
+        } catch (err) {
+            next(err);
         }
     }
 }

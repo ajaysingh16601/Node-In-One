@@ -9,5 +9,6 @@ const router = express.Router();
 router.get('/profile', authenticate, UserController.getProfile);
 router.put('/profile', authenticate, validate(UserValidator.updateProfileSchema), UserController.updateProfile);
 router.delete('/account', authenticate, UserController.deleteUserAccount);
+router.get('/list', authenticate, UserController.listUsers);
 
 export default router;

@@ -1,0 +1,32 @@
+name: Node.js CI/CD
+
+on:
+  push:
+    branches: ["main"]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repo
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # # 4. Run tests
+      # - name: Run tests
+      #   run: npm test
+
+      # 5. Build (if applicable)
+      - name: Build project
+        run: npm run build
