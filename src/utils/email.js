@@ -14,7 +14,9 @@ export const sendEmail = async (to, message) => {
 
     try {
         await sgMail.send(msg);
-        console.log(`Email sent to ${to}`);
+        if(process.env.NODE_ENV !== 'production'){
+            console.log(`Email sent to ${to}`);
+        }
     } catch (error) {
         console.error('Failed to send email:', error.response?.body || error.message);
         throw new Error('Failed to send email');

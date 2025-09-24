@@ -56,6 +56,8 @@ const userSchema = new mongoose.Schema(
         lastLoginAt: { type: Date },
         kycDetails: { type: mongoose.Schema.Types.ObjectId, ref: "KycDetails" },
         profileImageUrl: { type: String },
+        lastSeen: { type: Date, default: Date.now },
+        bio: { type: String, maxlength: 500 },
         createdAt: { type: Date, default: Date.now },
         updatedAt: { type: Date, default: Date.now },
     },

@@ -10,8 +10,16 @@ import v1Routes from './routes/v1/index.js';
 import './middlewares/googleStrategy.js';
 import { humanizeString } from 'ajeymanize-text-utils';
 import { config } from './config/env.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// set EJS as view engine
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 // Middleware setup
 app.use(cors({ origin: true, credentials: true }));

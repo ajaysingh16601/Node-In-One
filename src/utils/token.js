@@ -5,7 +5,6 @@ import { getJWTConfig } from '../config/env.js';
 
 export const generateJwtToken = async (payload, expiresIn = '1h', isRefresh = false) => {
       const jwtConfig = await getJWTConfig();
-
   const secret = isRefresh ? jwtConfig.refreshSecret : jwtConfig.secret;
   return jwt.sign(payload, secret, { expiresIn });
 };

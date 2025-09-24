@@ -1,0 +1,93 @@
+<!-- src\views\chat.ejs -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat Demo</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #messages { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; margin-bottom: 10px; }
+    .msg { margin: 5px 0; }
+    .msg.me { text-align: right; color: blue; }
+    .msg.other { text-align: left; color: green; }
+  </style>
+</head>
+<body>
+  <h1>Chat Demo</h1>
+
+  <div>
+    Conversation ID: <input id="convId" type="text" placeholder="conversationId" />
+    <button onclick="joinConversation()">Join</button>
+  </div>
+
+  <div id="messages"></div>
+
+  <input id="messageInput" type="text" placeholder="Type message..." onkeydown="if(event.key==='Enter'){sendMessage()}" />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    const token = "<%= token %>";
+    const currentUserId = "<%= currentUserId %>";
+
+    // Connect with token in auth, uses websocket transport
+    const socket = io('/', {
+      auth: { token },
+      transports: ['websocket']
+    });
+
+    socket.on("connect", () => {
+      console.log("Connected", socket.id);
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("connect_error full object:", err);
+      console.error("connect_error message:", err.message);
+      alert("Connection error: " + err.message + "\n(Check server logs for details.)");
+    });
+
+    // messages may be emitted using CHAT_EVENTS.MESSAGE which is 'message' in our constants
+    socket.on("message", (msg) => {
+      const isMe = (msg.sender && (String(msg.sender._id || msg.sender.id) === currentUserId));
+      renderMessage(msg, isMe);
+    });
+
+    function joinConversation() {
+      const convId = document.getElementById("convId").value;
+      socket.emit("join_conversation", { conversationId: convId }, (ack) => {
+        if (ack && ack.ok) {
+          console.log("Joined conversation", convId);
+          document.getElementById("messages").innerHTML = "";
+        } else {
+          alert("Join failed: " + (ack?.error || 'unknown'));
+        }
+      });
+    }
+
+    function sendMessage() {
+      const convId = document.getElementById("convId").value;
+      const input = document.getElementById("messageInput");
+      const body = input.value.trim();
+      if (!body) return;
+
+      const tempId = "tmp:" + Date.now();
+      socket.emit("send_message", { conversationId: convId, body, tempId }, (ack) => {
+        if (ack && ack.ok) {
+          renderMessage(ack.message, true);
+        } else {
+          alert("Send failed: " + (ack?.error || 'unknown'));
+        }
+      });
+      input.value = "";
+    }
+
+    function renderMessage(msg, isMe) {
+      const div = document.createElement("div");
+      div.className = "msg " + (isMe ? "me" : "other");
+      const senderName = (msg.sender && (msg.sender.name || msg.sender._id || msg.sender.id)) || 'Anon';
+      div.textContent = senderName + ": " + (msg.body || '[no text]');
+      document.getElementById("messages").appendChild(div);
+      div.scrollIntoView();
+    }
+  </script>
+</body>
+</html>

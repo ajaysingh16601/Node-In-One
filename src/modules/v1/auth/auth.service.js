@@ -10,9 +10,10 @@ import crypto from 'crypto';
 export const registerUser = async ({ email, password, username, firstname, lastname}) => {
     const exists = await User.findOne({ email });
     if (exists) throw new Error('Email already in use');
+// i want to update emailVerified=true
 
     const hashed = await hashPassword(password);
-    const user = await User.create({ email, password: hashed, username, firstname, lastname });
+    const user = await User.create({ email, password: hashed, username, firstname, lastname,emailVerified: true });
 
     const tokens = await generateToken(user._id);
     return { user, tokens };
@@ -23,10 +24,15 @@ export const checkUserExists = async (email) => {
     return !!user;
 };
 
+export const checkUserDetailsExists = async (email) => {
+    const user = await User.findOne({ email });
+    return user;
+};
 // login
 export const handleLogin = async (email, password) => {
     const user = await User.findOne({ email });
     if (!user) throw new Error('User not found');
+    if(user.isDeleted) throw new Error('This account has been deleted. Would you like to restore it?');
 
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) throw new Error('Invalid credentials');
