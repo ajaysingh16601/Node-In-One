@@ -49,11 +49,41 @@ export const register = async (req, res) => {
 // Step 1: Request OTP for Login
 export const login = async (req, res) => {
   const { email, password } = req.body;
+  
   try {
+    // Validate request body
+    if (!email || !password) {
+      return res.status(400).json({ 
+        message: 'Email and password are required',
+        error: 'MISSING_CREDENTIALS'
+      });
+    }
+
     const result = await AuthService.handleLogin(email, password);
     res.status(200).json(result);
   } catch (err) {
-    res.status(401).json({ message: err.message });
+    console.error('Login error:', err.message);
+    
+    // Provide specific error messages for different scenarios
+    if (err.message.includes('Google')) {
+      return res.status(400).json({ 
+        message: err.message,
+        error: 'OAUTH_ACCOUNT',
+        suggestion: 'Use Google Sign-In button instead'
+      });
+    }
+    
+    if (err.message.includes('password data')) {
+      return res.status(400).json({ 
+        message: 'Invalid login data provided',
+        error: 'INVALID_DATA'
+      });
+    }
+    
+    res.status(401).json({ 
+      message: err.message,
+      error: 'AUTH_FAILED'
+    });
   }
 };
 

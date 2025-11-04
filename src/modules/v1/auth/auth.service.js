@@ -30,9 +30,24 @@ export const checkUserDetailsExists = async (email) => {
 };
 // login
 export const handleLogin = async (email, password) => {
+    // Validate input parameters
+    if (!email || !password) {
+        throw new Error('Email and password are required');
+    }
+
     const user = await User.findOne({ email });
     if (!user) throw new Error('User not found');
     if(user.isDeleted) throw new Error('This account has been deleted. Would you like to restore it?');
+
+    // Check if user has a password (might be OAuth-only user)
+    if (!user.password) {
+        throw new Error('This account was created with Google. Please use Google Sign-In or set a password first.');
+    }
+
+    // Validate password parameters before bcrypt comparison
+    if (!password || !user.password) {
+        throw new Error('Invalid credentials - missing password data');
+    }
 
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) throw new Error('Invalid credentials');

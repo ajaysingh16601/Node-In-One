@@ -33,7 +33,7 @@ class ConfigManager {
         dbUri: process.env.MONGODB_URI,
         oauth: {
           googleClientId: process.env.GOOGLE_CLIENT_ID,
-          googleSecret: process.env.GOOGLE_CLIENT_SECRET,
+          googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
         },
         email: {
           user: process.env.SENDGRID_API_KEY,
@@ -64,7 +64,7 @@ class ConfigManager {
     } catch (error) {
       console.error('Failed to initialize configuration:', error);
       
-      // Fallback to environment variables
+        // Fallback to environment variables
       this.configCache = {
         port: process.env.PORT || 5000,
         jwt: {
@@ -77,7 +77,7 @@ class ConfigManager {
         dbUri: process.env.MONGODB_URI,
         oauth: {
           googleClientId: process.env.GOOGLE_CLIENT_ID,
-          googleSecret: process.env.GOOGLE_CLIENT_SECRET,
+          googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
         },
         email: {
           user: process.env.SENDGRID_API_KEY,

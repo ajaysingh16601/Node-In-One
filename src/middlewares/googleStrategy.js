@@ -8,8 +8,8 @@ passport.use(
     new GoogleStrategy(
         {
         clientID: config.oauth.googleClientId,
-        clientSecret: config.oauth.googleSecret,
-        callbackURL: "http://localhost:5000/api/v1/auth/google/callback",
+        clientSecret: config.oauth.googleClientSecret,  // Fixed: was googleSecret
+        callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:5000/api/v1/auth/google/callback",
         },
     async (accessToken, refreshToken, profile, done) => {
       try {

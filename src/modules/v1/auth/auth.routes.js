@@ -40,27 +40,42 @@ router.get(
   async (req, res) => {
     try {
       const user = req.user;
-      if (!user) return res.status(401).json({ message: "Google authentication failed" });
+      if (!user) {
+        console.error('Google authentication failed: No user returned');
+        return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=auth_failed`);
+      }
 
       const tokens = await generateToken(user._id);
 
-      // Send data to opener (popup) for frontend to receive
+      // More secure postMessage with origin validation
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       const script = `
         <script>
-          window.opener.postMessage(
-            {
-              type: 'google-login-success',
-              payload: ${JSON.stringify({ user, tokens })}
-            },
-            'http://localhost:5173/login'
-          );
-          window.close();
+          try {
+            if (window.opener) {
+              window.opener.postMessage(
+                {
+                  type: 'google-login-success',
+                  payload: ${JSON.stringify({ user, tokens })}
+                },
+                '${frontendUrl}'
+              );
+              window.close();
+            } else {
+              // Fallback: redirect to frontend with tokens in URL (less secure)
+              window.location.href = '${frontendUrl}/login?success=true&token=${tokens.accessToken}';
+            }
+          } catch (error) {
+            console.error('PostMessage error:', error);
+            window.location.href = '${frontendUrl}/login?error=postmessage_failed';
+          }
         </script>
       `;
       res.send(script);
     } catch (err) {
       console.error('Google login error:', err);
-      res.status(500).json({ message: 'Internal server error' });
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      res.redirect(`${frontendUrl}/login?error=server_error`);
     }
   }
 );
