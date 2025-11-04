@@ -53,6 +53,9 @@ class ConfigManager {
           templateId: process.env.EMAILJS_TEMPLATE_ID,
           publicKey: process.env.EMAILJS_PUBLIC_KEY,
         },
+        encryption: {
+          key: process.env.ENCRYPTION_KEY || 'default-encryption-key-change-in-production',
+        },
       };
 
       this.isInitialized = true;
@@ -84,7 +87,10 @@ class ConfigManager {
           sid: process.env.TWILIO_SID,
           token: process.env.TWILLIO_AUTH_TOKEN,
           phone: process.env.TWILIO_PHONE
-        }
+        },
+        encryption: {
+          key: process.env.ENCRYPTION_KEY || 'default-encryption-key-change-in-production',
+        },
       };
 
       this.isInitialized = true;

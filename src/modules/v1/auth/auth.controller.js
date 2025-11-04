@@ -68,6 +68,19 @@ export const verifyLoginOtp = async (req, res) => {
   }
 };
 
+
+// OAuth
+export const issueJWTForGoogleUser = async (req, res, next) => {
+  try {
+    const user = req.user;
+    const tokens = await generateToken(user._id);
+
+    res.status(200).json({ user, tokens });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // Refresh token
 export const refreshToken = async (req, res) => {
   const { refreshToken } = req.body;
@@ -184,14 +197,3 @@ if (!deletedRefresh) {
   }
 };
 
-// OAuth
-export const issueJWTForGoogleUser = async (req, res, next) => {
-  try {
-    const user = req.user;
-    const tokens = await generateToken(user._id);
-
-    res.status(200).json({ user, tokens });
-  } catch (err) {
-    next(err);
-  }
-};

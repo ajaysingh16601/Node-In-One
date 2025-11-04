@@ -1,3 +1,4 @@
+// src/modules/v1/auth/auth.routes.js
 import express from 'express';
 import { changePassword, issueJWTForGoogleUser, login, logoutController, refreshToken, register, requestForgotOtp, requestOtp, resetPassword, verifyForgotOtp, verifyLoginOtp, verifyOtp} from './auth.controller.js';
 import { validate } from '../../../middlewares/validate.js';
@@ -6,6 +7,7 @@ import { authenticate } from '../../../middlewares/authenticate.js';
 import { sendTestSMS } from '../../../controllers/sms.controller.js';
 import { validateLogout } from '../../../middlewares/validateLogout.js';
 import passport from 'passport';
+import { generateToken } from '../../../utils/token.js';
 
 const router = express.Router();
 
@@ -32,7 +34,35 @@ router.post('/logout', validateLogout, logoutController);
 
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-router.get('/google/callback', passport.authenticate('google', { session: false, failureRedirect: '/' }), issueJWTForGoogleUser
+router.get(
+  '/google/callback',
+  passport.authenticate('google', { session: false, failureRedirect: '/' }),
+  async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user) return res.status(401).json({ message: "Google authentication failed" });
+
+      const tokens = await generateToken(user._id);
+
+      // Send data to opener (popup) for frontend to receive
+      const script = `
+        <script>
+          window.opener.postMessage(
+            {
+              type: 'google-login-success',
+              payload: ${JSON.stringify({ user, tokens })}
+            },
+            'http://localhost:5173/login'
+          );
+          window.close();
+        </script>
+      `;
+      res.send(script);
+    } catch (err) {
+      console.error('Google login error:', err);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
 );
 
 export default router;
