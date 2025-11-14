@@ -100,18 +100,15 @@ class AWSConfig {
   clearCache() {
     this.secretsCache.clear();
     this.cacheExpiry.clear();
-    console.log('AWS secrets cache cleared');
   }
 
   // Warm up cache by pre-loading secrets
   async warmupCache() {
     try {
-      console.log('Warming up AWS secrets cache...');
       await Promise.all([
         this.getJWTSecret(),
         this.getJWTRefreshSecret()
       ]);
-      console.log('AWS secrets cache warmed up successfully');
     } catch (error) {
       console.error('Failed to warm up secrets cache:', error);
       throw error;

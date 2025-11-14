@@ -4,13 +4,16 @@ import * as AuthService from './auth.service.js';
 import { generateJwtToken, generateToken, verifyToken } from '../../../utils/token.js';
 import jwt from 'jsonwebtoken';
 import TokenStore from '../../../models/TokenStore.js';
+import { getJWTConfig } from '../../../config/env.js';
 // Register
 
 // Step 1: Request OTP for Registration
 export const requestOtp = async (req, res) => {
   const { email } = req.body;
-  const userExists = await AuthService.checkUserExists(email);
-
+  const userExists = await AuthService.checkUserDetailsExists(email);
+  if (userExists && userExists.isDeleted) {
+    return res.status(400).json({ message: 'An account with this email was previously deleted. Do you want to restore it?' });
+  }
   if (userExists) return res.status(400).json({ message: 'User already registered' });
 
   const result = await OtpService.requestOtp(email,'register');
@@ -22,7 +25,7 @@ export const verifyOtp = async (req, res) => {
   const { email, otp, secret } = req.body;
   await OtpService.verifyOtp({ email, otp, secret, type: 'register' });
 
-  const registrationToken = generateJwtToken({ userId: email }, '10m');
+  const registrationToken = await generateJwtToken({ userId: email }, '10m');
   res.json({ registrationToken });
 };
 
@@ -32,7 +35,7 @@ export const register = async (req, res) => {
 
   let email;
   try {
-    const decoded = verifyToken(registrationToken);
+    const decoded = await verifyToken(registrationToken);
     email = decoded.userId; // we passed email in token
   } catch (err) {
     return res.status(401).json({ message: 'Invalid or expired registration token' });
@@ -46,11 +49,41 @@ export const register = async (req, res) => {
 // Step 1: Request OTP for Login
 export const login = async (req, res) => {
   const { email, password } = req.body;
+  
   try {
+    // Validate request body
+    if (!email || !password) {
+      return res.status(400).json({ 
+        message: 'Email and password are required',
+        error: 'MISSING_CREDENTIALS'
+      });
+    }
+
     const result = await AuthService.handleLogin(email, password);
     res.status(200).json(result);
   } catch (err) {
-    res.status(401).json({ message: err.message });
+    console.error('Login error:', err.message);
+    
+    // Provide specific error messages for different scenarios
+    if (err.message.includes('Google')) {
+      return res.status(400).json({ 
+        message: err.message,
+        error: 'OAUTH_ACCOUNT',
+        suggestion: 'Use Google Sign-In button instead'
+      });
+    }
+    
+    if (err.message.includes('password data')) {
+      return res.status(400).json({ 
+        message: 'Invalid login data provided',
+        error: 'INVALID_DATA'
+      });
+    }
+    
+    res.status(401).json({ 
+      message: err.message,
+      error: 'AUTH_FAILED'
+    });
   }
 };
 
@@ -62,6 +95,19 @@ export const verifyLoginOtp = async (req, res) => {
     res.status(200).json(result);
   } catch (err) {
     res.status(401).json({ message: err.message });
+  }
+};
+
+
+// OAuth
+export const issueJWTForGoogleUser = async (req, res, next) => {
+  try {
+    const user = req.user;
+    const tokens = await generateToken(user._id);
+
+    res.status(200).json({ user, tokens });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -90,7 +136,7 @@ export const requestForgotOtp = async (req, res) => {
 
   try {
     const result = await OtpService.requestOtp(email, 'reset');
-    res.json({ message: 'OTP sent to your email', secret: result.secret });
+    res.json({ message: 'OTP sent to your email', secret: result.secret, otp: result.otp });
   } catch (err) {
     res.status(429).json({ message: err.message });
   }
@@ -102,7 +148,9 @@ export const verifyForgotOtp = async (req, res) => {
 
   try {
     await OtpService.verifyOtp({ email, otp, secret, type: 'reset' });
-    const resetToken = generateToken(email, '15m'); // email passed as userId
+    // const resetToken = await generateToken(email, '15m'); // email passed as userId
+        const jwtConfig = await getJWTConfig();
+    const resetToken = jwt.sign({ userId: email }, jwtConfig.secret, { expiresIn: '15m' });
     res.json({ resetToken });
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -116,7 +164,7 @@ export const resetPassword = async (req, res) => {
 
   let email;
   try {
-    const decoded = verifyToken(resetToken);
+    const decoded = await verifyToken(resetToken);
     email = decoded.userId;
   } catch (err) {
     return res.status(401).json({ message: 'Invalid or expired reset token' });
@@ -179,14 +227,3 @@ if (!deletedRefresh) {
   }
 };
 
-// OAuth
-export const issueJWTForGoogleUser = async (req, res, next) => {
-  try {
-    const user = req.user;
-    const tokens = await generateToken(user._id);
-
-    res.status(200).json({ user, tokens });
-  } catch (err) {
-    next(err);
-  }
-};

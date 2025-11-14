@@ -33,7 +33,7 @@ class ConfigManager {
         dbUri: process.env.MONGODB_URI,
         oauth: {
           googleClientId: process.env.GOOGLE_CLIENT_ID,
-          googleSecret: process.env.GOOGLE_CLIENT_SECRET,
+          googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
         },
         email: {
           user: process.env.SENDGRID_API_KEY,
@@ -43,27 +43,28 @@ class ConfigManager {
           sid: process.env.TWILIO_SID,
           token: process.env.TWILLIO_AUTH_TOKEN,
           phone: process.env.TWILIO_PHONE,    
-          server: process.env.TWILIO_Server,   // smtp.sendgrid.net
-          port: process.env.TWILIO_Ports,      // 587
-          username: process.env.TWILIO_Username, // "apikey"
-          password: process.env.TWILIO_Password, // SENDGRID_API_KEY
+          server: process.env.TWILIO_Server,
+          port: process.env.TWILIO_Ports,
+          username: process.env.TWILIO_Username,
+          password: process.env.TWILIO_Password,
         },
         emailjs: {
           serviceId: process.env.EMAILJS_SERVICE_ID,
           templateId: process.env.EMAILJS_TEMPLATE_ID,
           publicKey: process.env.EMAILJS_PUBLIC_KEY,
         },
+        encryption: {
+          key: process.env.ENCRYPTION_KEY || 'default-encryption-key-change-in-production',
+        },
       };
 
       this.isInitialized = true;
-      console.log('Configuration initialized with S3 secrets');
       return this.configCache;
 
     } catch (error) {
       console.error('Failed to initialize configuration:', error);
       
-      // Fallback to environment variables
-      console.log('Falling back to environment variables');
+        // Fallback to environment variables
       this.configCache = {
         port: process.env.PORT || 5000,
         jwt: {
@@ -76,7 +77,7 @@ class ConfigManager {
         dbUri: process.env.MONGODB_URI,
         oauth: {
           googleClientId: process.env.GOOGLE_CLIENT_ID,
-          googleSecret: process.env.GOOGLE_CLIENT_SECRET,
+          googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
         },
         email: {
           user: process.env.SENDGRID_API_KEY,
@@ -86,7 +87,10 @@ class ConfigManager {
           sid: process.env.TWILIO_SID,
           token: process.env.TWILLIO_AUTH_TOKEN,
           phone: process.env.TWILIO_PHONE
-        }
+        },
+        encryption: {
+          key: process.env.ENCRYPTION_KEY || 'default-encryption-key-change-in-production',
+        },
       };
 
       this.isInitialized = true;
