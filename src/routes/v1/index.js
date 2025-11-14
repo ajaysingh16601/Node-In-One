@@ -3,6 +3,7 @@ import express from 'express';
 import authRoutes from '../../modules/v1/auth/auth.routes.js';
 import userRoutes from '../../modules/v1/user/user.routes.js';
 import chatRoutes from '../../modules/v1/chat/chat.routes.js';
+import jobRoutes from './jobRoutes.js';
 import { config } from '../../config/env.js';
 
 const router = express.Router();
@@ -10,6 +11,7 @@ const router = express.Router();
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/chat', chatRoutes);
+router.use('/jobs', jobRoutes);
 // router.use('/tasks', taskRoutes);
 
 router.get('/chat-demo', (req, res) => {

@@ -8,6 +8,8 @@ import app from './app.js';
 import { config } from './config/env.js';
 import socketAuth from './middlewares/socketAuth.js';
 import initSockets from './sockets/index.js';
+import { initializeScheduler, startAllJobs } from './jobs/scheduler.js';
+import { initializeEmailQueue } from './jobs/emailQueue.js';
 
 const server = createServer(app);
 
@@ -47,6 +49,12 @@ const io = new Server(server, {
     io.on('connection_error', (err) => {
   console.warn('Global socket connection_error', err);
 });
+
+    // Initialize job scheduler
+    await initializeEmailQueue();
+    await initializeScheduler();
+    startAllJobs();
+    console.log('Job scheduler initialized and started');
 
     // Start server
     server.listen(config.port, () => {
